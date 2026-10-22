@@ -35,7 +35,8 @@ test('les questions essentielles existent toutes', () => {
 });
 
 test('la liste SQL des questions essentielles est identique à celle de l’app', () => {
-  const sql = readFileSync(new URL('../../supabase/migrations/0002_onboarding.sql', import.meta.url), 'utf8');
+  // Les tests sont lancés depuis la racine du projet (npm test).
+  const sql = readFileSync('supabase/migrations/0002_onboarding.sql', 'utf8');
   const m = sql.match(/array\[([^\]]+)\]::text\[\]\s*--\s*REVEAL_ESSENTIALS/);
   assert.ok(m, 'liste introuvable dans la migration');
   const ids = m[1].split(',').map((s) => s.trim().replace(/'/g, ''));
