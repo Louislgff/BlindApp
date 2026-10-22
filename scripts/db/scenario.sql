@@ -94,4 +94,34 @@ select set_config('request.jwt.claims', '{"role":"anon"}', true); set local role
 select pg_temp.ok((select count(*) from profiles) = 0 and (select count(*) from messages) = 0, 'Un visiteur non connecté ne voit aucun profil ni message');
 reset role;
 
+-- 11. Inscription d'un nouveau membre depuis l'app (numéro vérifié par SMS).
+select gen_random_uuid() as newbie \gset
+insert into auth.users (id, instance_id, aud, role, phone, phone_confirmed_at, created_at, updated_at, raw_app_meta_data, raw_user_meta_data)
+  values (:'newbie', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', '33600000099', now(), now(), now(), '{}', '{}');
+select set_config('t.newbie', :'newbie', true) \g /dev/null
+select pg_temp.as_user(:'newbie'); set local role authenticated;
+-- Il tente de se déclarer abonné et vérifié : ignoré.
+insert into profiles (id, first_name, birth_date, gender, seeking, age_min, age_max, zone, lat, lng, subscription_status, selfie_verified_at)
+  values (:'newbie', 'Nouveau', current_date - interval '31 years', 'homme', '{femme}', 28, 36, 'Paris 10e', 48.876, 2.361, 'active', now());
+select pg_temp.ok((select subscription_status = 'none' and selfie_verified_at is null and phone_verified_at is not null
+  from profiles where id = current_setting('t.newbie')::uuid), 'Inscription : impossible de se déclarer abonné ou vérifié soi-même ; numéro vérifié repris du SMS');
+update profiles set subscription_status = 'active' where id = current_setting('t.newbie')::uuid;
+select pg_temp.ok((select subscription_status from profiles where id = current_setting('t.newbie')::uuid) = 'none', 'Impossible de s’activer un abonnement depuis l’app');
+do $$ begin
+  update profiles set birth_date = current_date - interval '17 years' where id = current_setting('t.newbie')::uuid;
+  perform pg_temp.ok(false, 'Un profil de moins de 18 ans devrait être refusé');
+exception when raise_exception then perform pg_temp.ok(true, 'Profil de moins de 18 ans refusé');
+end $$;
+select pg_temp.ok(not reveal_ready(current_setting('t.newbie')::uuid), 'Sans les questions essentielles : pas encore prêt pour le reveal');
+insert into answers (user_id, question_id, mine, accepted, importance)
+  select current_setting('t.newbie')::uuid, e, '"x"'::jsonb, '["x"]'::jsonb, 10 from unnest(reveal_essentials()) e where e <> 'religion';
+select pg_temp.ok(not reveal_ready(current_setting('t.newbie')::uuid), 'Une question essentielle manquante : toujours pas prêt');
+insert into answers (user_id, question_id, mine, importance, skipped) values (:'newbie', 'religion', '""', 0, true);
+select pg_temp.ok(reveal_ready(current_setting('t.newbie')::uuid), 'Questions essentielles faites (question sensible passée) : prêt pour le reveal');
+reset role;
+select pg_temp.as_user(:'me'); set local role authenticated;
+select pg_temp.ok((select count(*) from answers where user_id = current_setting('t.newbie')::uuid) = 0
+  and (select count(*) from profiles where id = current_setting('t.newbie')::uuid) = 0, 'Les réponses du nouveau membre restent privées');
+reset role;
+
 rollback;

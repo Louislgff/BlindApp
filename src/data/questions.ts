@@ -107,6 +107,16 @@ export const canBeDeterminant = (q: Question) => q.kind === 'compat' || q.kind =
 
 export const QUESTIONS_BY_ID = new Map(QUESTIONS.map((q) => [q.id, q]));
 
+/**
+ * Les questions essentielles : une fois répondues (avec les bases), on entre dans le prochain reveal.
+ * Ce sont celles qui pèsent le plus dans le matching. Le reste affine les résultats.
+ * Doit rester identique à la liste de supabase/migrations/0002_onboarding.sql (vérifié par un test).
+ */
+export const REVEAL_ESSENTIALS = [
+  'recherche', 'enfants', 'desir-enfants', 'tabac', 'alcool', 'rythme', 'couple', 'vivre-ensemble',
+  'mariage', 'projet-5-ans', 'religion', 'sorties', 'voyages', 'temperament', 'communication',
+];
+
 export const STEP_TITLES: Record<number, string> = {
   2: 'Les bases',
   3: 'Mode de vie',

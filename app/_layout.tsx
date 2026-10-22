@@ -10,6 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AccountProvider } from '../src/state/account';
 import { StoreProvider } from '../src/state/store';
 import { colors } from '../src/theme';
 
@@ -32,6 +33,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
+      <AccountProvider>
       <StoreProvider>
         <StatusBar style="dark" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.paper } }}>
@@ -39,8 +41,11 @@ export default function RootLayout() {
           <Stack.Screen name="reveal-day" options={{ animation: 'fade', gestureEnabled: false }} />
           <Stack.Screen name="revealed/[id]" options={{ animation: 'fade' }} />
           <Stack.Screen name="onboarding/index" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="auth/phone" />
+          <Stack.Screen name="auth/code" />
         </Stack>
       </StoreProvider>
+      </AccountProvider>
     </SafeAreaProvider>
   );
 }

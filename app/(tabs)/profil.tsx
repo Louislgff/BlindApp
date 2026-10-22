@@ -6,10 +6,14 @@ import { ProfileCard } from '../../src/components/ProfileCard';
 import { Body, Divider, Muted, Screen, Serif } from '../../src/components/ui';
 import { ME, SUBSCRIPTION_ACTIVE } from '../../src/data/mock';
 import { QUESTIONS } from '../../src/data/questions';
+import { progress } from '../../src/onboarding/progress';
+import { maskPhone, useAccount } from '../../src/state/account';
 import { useStore } from '../../src/state/store';
 import { colors, fonts, radius, space } from '../../src/theme';
 
-const MENU: { label: string; value: string; accent?: boolean; onPress?: () => void }[] = [
+type Item = { label: string; value: string; accent?: boolean; onPress?: () => void };
+
+const MENU: Item[] = [
   { label: 'Mes réponses', value: `${Object.values(ME.answers).filter((a) => !a.skipped).length} / ${QUESTIONS.length}`, onPress: () => router.push('/answers') },
   { label: 'Critères déterminants', value: '~340 profils compatibles', onPress: () => router.push('/onboarding?mode=edit&step=final') },
   { label: 'Mes photos', value: `${ME.photos} · cachées` },
@@ -20,6 +24,18 @@ const MENU: { label: string; value: string; accent?: boolean; onPress?: () => vo
 
 export default function ProfilTab() {
   const { myProfile } = useStore();
+  const account = useAccount();
+  // Connecté : les lignes « compte » sont réelles ; le reste (photos, abonnement…) arrive aux étapes suivantes.
+  const menu: Item[] = account.session
+    ? [
+        { label: 'Mes réponses', value: `${progress(account.answers, !!account.basics).done} / ${QUESTIONS.length}`, onPress: () => router.push('/answers') },
+        ...MENU.slice(1, 3),
+        { label: 'Vérification', value: 'Numéro vérifié · selfie à faire', onPress: () => router.push('/verification') },
+        { label: 'Abonnement', value: 'Démarre au premier reveal' },
+        { label: 'Compte', value: maskPhone(account.phone) },
+        { label: 'Se déconnecter', value: '', onPress: () => account.signOut() },
+      ]
+    : [...MENU, { label: 'Créer mon compte', value: 'Démo', accent: true, onPress: () => router.push('/auth/phone') }];
 
   return (
     <Screen scroll>
@@ -42,7 +58,7 @@ export default function ProfilTab() {
       </View>
 
       <View style={{ paddingHorizontal: space.xl, paddingTop: space.l }}>
-        {MENU.map((item) => (
+        {menu.map((item) => (
           <View key={item.label}>
             <Divider />
             <Pressable accessibilityRole="button" onPress={item.onPress} style={styles.row}>

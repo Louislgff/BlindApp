@@ -5,6 +5,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Body, Button, Divider, Label, Muted, Screen, Serif, SerifItalic } from '../../src/components/ui';
 import { NEXT_REVEAL, PAST_REVEALS } from '../../src/data/mock';
+import { progress } from '../../src/onboarding/progress';
+import { useAccount } from '../../src/state/account';
 import { revealSummary, useStore } from '../../src/state/store';
 import { colors, fonts, radius, space } from '../../src/theme';
 
@@ -28,6 +30,49 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const revealLabel = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', timeZone: 'Europe/Paris' })
   .format(NEXT_REVEAL)
   .replace(/^./, (c) => c.toUpperCase());
+
+/** État du compte : démo, questionnaire à finir, ou prêt pour le reveal. */
+function AccountStatus() {
+  const account = useAccount();
+  if (!account.loaded) return null;
+  if (!account.session) {
+    return (
+      <View style={[styles.status, { flexDirection: 'column', alignItems: 'stretch' }]}>
+        <View style={{ flexDirection: 'row', gap: space.m, alignItems: 'center' }}>
+          <Feather name="eye" size={22} color={colors.accent} />
+          <View style={{ flex: 1 }}>
+            <Body style={{ fontFamily: fonts.sansBold, fontSize: 14 }}>Vous visitez la démo</Body>
+            <Muted>Vous êtes Lucien, les profils sont fictifs.</Muted>
+          </View>
+        </View>
+        <Button label="Créer mon compte" onPress={() => router.push('/auth/phone')} />
+      </View>
+    );
+  }
+  const p = progress(account.answers, !!account.basics);
+  return (
+    <View style={[styles.status, { flexDirection: 'column', alignItems: 'stretch' }]}>
+      <View style={{ flexDirection: 'row', gap: space.m, alignItems: 'center' }}>
+        <Feather name={p.ready ? 'check-circle' : 'edit-3'} size={22} color={colors.accent} />
+        <View style={{ flex: 1 }}>
+          <Body style={{ fontFamily: fonts.sansBold, fontSize: 14 }}>
+            {p.ready ? `Prêt pour le prochain reveal${account.basics ? `, ${account.basics.firstName}` : ''}` : 'Terminez l’essentiel pour entrer dans le reveal'}
+          </Body>
+          <Muted>
+            {p.ready
+              ? p.done < p.total ? `Questionnaire : ${p.done} / ${p.total}. Affinez vos réponses pour des % plus fiables.` : 'Questionnaire complet.'
+              : !account.basics
+                ? `Commencez par les bases · ~${p.minutesLeft + 1} min en tout`
+                : `${p.essentialsTotal - p.essentialsDone} question${p.essentialsTotal - p.essentialsDone > 1 ? 's' : ''} essentielle${p.essentialsTotal - p.essentialsDone > 1 ? 's' : ''} restante${p.essentialsTotal - p.essentialsDone > 1 ? 's' : ''} · ~${p.minutesLeft} min`}
+          </Muted>
+        </View>
+      </View>
+      {(!p.ready || p.done < p.total) && (
+        <Button variant={p.ready ? 'ghost' : 'primary'} label={p.ready ? 'Affiner mes réponses' : 'Continuer le questionnaire'} onPress={() => router.push('/onboarding')} />
+      )}
+    </View>
+  );
+}
 
 export default function RevealHome() {
   const { done, days, hours, minutes } = useCountdown(NEXT_REVEAL);
@@ -70,13 +115,7 @@ export default function RevealHome() {
         </View>
       )}
 
-      <View style={styles.status}>
-        <Feather name="check-circle" size={22} color={colors.accent} />
-        <View style={{ flex: 1 }}>
-          <Body style={{ fontFamily: fonts.sansBold, fontSize: 14 }}>Profil complet, vérifié</Body>
-          <Muted>Vous êtes inclus dans ce reveal.</Muted>
-        </View>
-      </View>
+      <AccountStatus />
 
       <View style={styles.block}>
         <Label>Reveals précédents</Label>
@@ -120,7 +159,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: radius.s,
     flexDirection: 'row',
-    gap: space.m,
+    gap: space.l,
     alignItems: 'center',
   },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 52 },
