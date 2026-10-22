@@ -4,6 +4,13 @@ Application de rencontre iOS et Android : pas de swipe, cinq profils toutes les 
 
 Version 0.1 : les écrans principaux fonctionnent avec des données de démonstration. L'algorithme de matching est réel et testé ; le backend est prêt à brancher.
 
+## En ligne, sans rien installer
+
+- **Version web** : https://blind.expo.app — republiée automatiquement à chaque modification (captures et contrôle dans `reports/web.md`).
+- **Base de données** : Supabase (UE). Le workflow « Base de données » applique les migrations de `supabase/migrations`, recrée les profils de démo, simule deux reveals et rejoue le scénario de reveal mutuel. Rapport : `reports/simulation.md`.
+- **Vérifications** : le workflow « CI » lance les tests du matching, le typage et le build web à chaque envoi.
+- **Secrets GitHub** (Settings › Secrets and variables › Actions) : `SUPABASE_DB_URL`, `EXPOTOKEN`. Jamais dans le code.
+
 ## Voir l'app sur ordinateur (navigateur)
 
 ```bash
