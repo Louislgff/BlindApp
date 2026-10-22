@@ -10,21 +10,24 @@ jobs:
   verifier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Installer les dépendances
         run: npm install --no-audit --no-fund
       - name: Versions alignées sur le SDK Expo
-        run: npx expo install --check || echo "::warning::Certaines versions ne correspondent pas au SDK Expo"
+        # Le détail est publié en annotations (lisibles dans l'onglet Actions sans ouvrir les logs).
+        run: |
+          npx expo install --check > check.txt 2>&1 && exit 0
+          grep -v '^$' check.txt | while read -r l; do echo "::warning title=expo install --check::$l"; done
       - name: Tests du matching
         run: npm test
       - name: Typage TypeScript
         run: npm run typecheck
       - name: Build web
         run: npx expo export --platform web
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: web
           path: dist
