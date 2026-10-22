@@ -82,7 +82,7 @@ const empty = [...session].filter(([, l]) => l.length === 0).map(([id]) => {
   const compatible = pool.filter((o) => o.id !== id && isEligible(me, o, QUESTIONS));
   const possible = compatible.filter((o) => !already.has(pairKey(id, o.id))).length;
   const r = rows.get(id)!;
-  return `${r.firstName} (${r.gender}, ${r.age} ans, ${r.zone}) : ${possible === 0 ? (compatible.length ? `ses ${compatible.length} profil${compatible.length > 1 ? 's' : ''} compatible${compatible.length > 1 ? 's' : ''} lui ont déjà été proposés` : 'aucun profil compatible avec ses critères') : `${possible} profil${possible > 1 ? 's' : ''} compatible${possible > 1 ? 's' : ''}, ${possible > 1 ? 'tous' : ''} déjà complet${possible > 1 ? 's' : ''} ce soir`.replace(',  déjà', ', déjà')}`;
+  return `${r.firstName} (${r.gender}, ${r.age} ans, ${r.zone}) : ${possible === 0 ? (compatible.length > 1 ? `ses ${compatible.length} profils compatibles lui ont déjà été proposés` : compatible.length === 1 ? 'son seul profil compatible lui a déjà été proposé' : 'aucun profil compatible avec ses critères') : `${possible} profil${possible > 1 ? 's' : ''} compatible${possible > 1 ? 's' : ''}, ${possible > 1 ? 'tous' : ''} déjà complet${possible > 1 ? 's' : ''} ce soir`.replace(',  déjà', ', déjà')}`;
 });
 
 const all = [...session.values()].flat().map((c) => c.result.score).sort((a, b) => a - b);
