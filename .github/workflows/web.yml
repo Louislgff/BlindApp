@@ -38,3 +38,18 @@ jobs:
           npx -y eas-cli@latest deploy --prod --non-interactive --json > deploy.json 2> deploy.err || { echo "::error title=EAS Hosting::$(tail -c 600 deploy.err | tr '\n' ' ')"; exit 1; }
           url=$(node -e "const d=require('./deploy.json'); console.log(d.production?.url || d.url || d.deploymentUrl || JSON.stringify(d).slice(0,300))")
           echo "::notice title=Version web::$url"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        id: deploy
+      - name: Captures de la version publiée
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1
+          npx playwright install --with-deps chromium >/dev/null
+          node scripts/web/screenshots.mjs "${{ steps.deploy.outputs.url }}"
+      - name: Enregistrer les captures
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/web.md reports/web
+          git diff --cached --quiet && exit 0
+          git commit -m "Captures de la version web"
+          git pull --rebase -q && git push
