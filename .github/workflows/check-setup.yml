@@ -31,4 +31,4 @@ jobs:
           else
             echo "::error title=Supabase::Connexion impossible : $(head -c 200 err.txt | tr '\n' ' ' | sed 's/postgresql:[^ ]*//g')"
           fi
-# relance 2026-10-22T08:28:33Z
+# relance 2026-10-22T08:36:13Z
