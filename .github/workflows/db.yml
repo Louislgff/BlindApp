@@ -1,0 +1,42 @@
+# Base de données : applique les migrations, recrée les profils de démo, simule deux reveals
+# et rejoue le scénario de reveal mutuel. Le rapport est enregistré dans reports/simulation.md.
+name: Base de données
+
+on:
+  push:
+    branches: [main]
+    paths: ['supabase/migrations/**', 'scripts/db/**', 'src/matching/**', 'src/data/**', '.github/workflows/db.yml']
+  workflow_dispatch:
+
+concurrency: base-de-donnees
+
+permissions:
+  contents: write
+
+jobs:
+  simuler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Installer les dépendances
+        run: npm install --no-audit --no-fund
+      - name: Client PostgreSQL
+        run: sudo apt-get install -y -qq postgresql-client >/dev/null
+      - name: Migrations, profils de démo, reveals, scénario
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: scripts/db/simulate.sh
+      - name: Enregistrer le rapport
+        if: always()
+        run: |
+          [ -f reports/simulation.md ] || exit 0
+          grep -q '❌' reports/simulation.md && echo "::error title=Simulation::Au moins un contrôle en échec, voir reports/simulation.md"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/simulation.md
+          git diff --cached --quiet && exit 0
+          git commit -m "Rapport de simulation des reveals"
+          git pull --rebase -q && git push

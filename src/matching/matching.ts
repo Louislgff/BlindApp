@@ -239,3 +239,102 @@ export function selectRevealBatch(
     .sort((x, y) => x.result.score - y.result.score)
     .map(({ profile, result }) => ({ profile, result }));
 }
+
+// ---------- Reveal d'une ville entière (côté serveur) ----------
+
+/** Clé d'une paire, indépendante de l'ordre. */
+export const pairKey = (a: string, b: string) => (a < b ? `${a}|${b}` : `${b}|${a}`);
+
+export interface SessionOptions {
+  size?: number; // 5 profils par personne au maximum
+  /** Paires déjà proposées lors d'un reveal précédent : jamais reproposées. */
+  alreadyPaired?: Set<string>;
+}
+
+/**
+ * Compose le reveal de toute une ville d'un coup, par PAIRES : si Léa est proposée à Lucien,
+ * Lucien est proposé à Léa le même soir (« Ils vous découvrent au même moment »).
+ *
+ * Répartition équitable, en tours : au tour 1 chacun reçoit au plus 1 profil, au tour 2 au plus 2…
+ * jusqu'à `size`. À chaque tour, on sert d'abord les personnes qui ont le moins d'options
+ * (critères rares), chacune avec son meilleur profil encore disponible. Sans cela, les profils
+ * très compatibles avec tout le monde sont pris en premier et certains abonnés n'ont rien.
+ * Chaque liste est renvoyée du moins au plus compatible (ordre du dévoilement).
+ */
+export function selectSessionPairs(
+  pool: MatchProfile[],
+  questions: Question[],
+  opts: SessionOptions = {},
+): Map<string, RevealCandidate[]> {
+  const size = opts.size ?? 5;
+  const done = opts.alreadyPaired ?? new Set<string>();
+  const byId = new Map(pool.map((p) => [p.id, p]));
+
+  // Options de chacun : profils éligibles dans les deux sens et jamais proposés, du meilleur au moins bon.
+  const options = new Map<string, { id: string; result: MatchResult }[]>(pool.map((p) => [p.id, []]));
+  for (let i = 0; i < pool.length; i++) {
+    for (let j = i + 1; j < pool.length; j++) {
+      const a = pool[i], b = pool[j];
+      if (done.has(pairKey(a.id, b.id)) || !isEligible(a, b, questions)) continue;
+      const result = computeMatch(a, b, questions);
+      options.get(a.id)!.push({ id: b.id, result });
+      options.get(b.id)!.push({ id: a.id, result });
+    }
+  }
+  for (const list of options.values()) list.sort((x, y) => y.result.score - x.result.score || x.id.localeCompare(y.id));
+
+  const out = new Map<string, RevealCandidate[]>(pool.map((p) => [p.id, []]));
+  const taken = new Set<string>();
+  for (let cap = 1; cap <= size; cap++) {
+    // Les plus contraints d'abord (moins d'options restantes), puis par identifiant pour un résultat stable.
+    const order = pool
+      .map((p) => p.id)
+      .sort((x, y) => options.get(x)!.length - options.get(y)!.length || x.localeCompare(y));
+    for (const id of order) {
+      const mine = out.get(id)!;
+      if (mine.length >= cap) continue;
+      const best = options.get(id)!.find((o) => out.get(o.id)!.length < cap && !taken.has(pairKey(id, o.id)));
+      if (!best) continue;
+      taken.add(pairKey(id, best.id));
+      mine.push({ profile: byId.get(best.id)!, result: best.result });
+      out.get(best.id)!.push({ profile: byId.get(id)!, result: best.result });
+    }
+  }
+
+  // Rééquilibrage : si une personne a peu de profils alors qu'un de ses profils possibles est complet,
+  // on lui cède une paire de quelqu'un qui en a nettement plus (au moins 2 de plus).
+  // Chaque échange réduit l'écart : la boucle s'arrête forcément.
+  let improved = true;
+  while (improved) {
+    improved = false;
+    const order = pool.map((p) => p.id).sort((x, y) => out.get(x)!.length - out.get(y)!.length || x.localeCompare(y));
+    for (const u of order) {
+      const cu = out.get(u)!.length;
+      if (cu >= size) break;
+      for (const o of options.get(u)!) {
+        if (taken.has(pairKey(u, o.id))) continue;
+        const lv = out.get(o.id)!;
+        if (lv.length < size) continue; // pas complet : il aurait déjà été pris au dernier tour
+        const victim = lv
+          .filter((c) => out.get(c.profile.id)!.length >= cu + 2)
+          .sort((x, y) => out.get(y.profile.id)!.length - out.get(x.profile.id)!.length)[0];
+        if (!victim) continue;
+        const w = victim.profile.id;
+        // v lâche w, prend u.
+        lv.splice(lv.indexOf(victim), 1);
+        const lw = out.get(w)!;
+        lw.splice(lw.findIndex((c) => c.profile.id === o.id), 1);
+        taken.delete(pairKey(o.id, w));
+        taken.add(pairKey(u, o.id));
+        out.get(u)!.push({ profile: byId.get(o.id)!, result: o.result });
+        lv.push({ profile: byId.get(u)!, result: o.result });
+        improved = true;
+        break;
+      }
+      if (improved) break;
+    }
+  }
+
+  for (const list of out.values()) list.sort((x, y) => x.result.score - y.result.score);
+  return out;
+}

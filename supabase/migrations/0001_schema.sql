@@ -41,6 +41,8 @@ create view public_profiles as
 -- Pas d'accès direct : servie uniquement par une fonction serveur, pour les profils
 -- proposés à l'utilisateur (reveal_assignments) ou avec qui il a un match.
 revoke all on public_profiles from public;
+-- Supabase donne par défaut des droits aux rôles anon et authenticated : on les retire aussi.
+revoke all on public_profiles from anon, authenticated;
 
 -- ---------- Réponses au questionnaire ----------
 
