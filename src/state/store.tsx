@@ -42,7 +42,7 @@ export function matchStatus(profileId: string, conversations: Conversation[], ne
   return newMatches.includes(profileId) ? 'Pas encore de message' : 'Pas de conversation';
 }
 
-const today = () => new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' }).format(new Date());
+const today = () => new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', timeZone: 'Europe/Paris' }).format(new Date());
 
 interface Store {
   conversations: Conversation[];

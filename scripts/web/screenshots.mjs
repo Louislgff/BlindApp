@@ -18,7 +18,7 @@ async function shot(name, label) {
   steps.push(`| ${label} | ![](web/${name}.png) |`);
 }
 async function tap(text) {
-  try { await page.getByText(text, { exact: false }).first().click({ timeout: 8000 }); return true; }
+  try { await page.getByText(text, { exact: true }).last().click({ timeout: 8000 }); return true; }
   catch { steps.push(`| ⚠️ Introuvable : « ${text} » | |`); return false; }
 }
 

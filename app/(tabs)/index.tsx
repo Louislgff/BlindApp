@@ -25,7 +25,7 @@ function useCountdown(target: Date) {
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const revealLabel = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric' })
+const revealLabel = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', timeZone: 'Europe/Paris' })
   .format(NEXT_REVEAL)
   .replace(/^./, (c) => c.toUpperCase());
 
