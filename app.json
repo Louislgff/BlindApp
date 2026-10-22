@@ -34,6 +34,12 @@
       "output": "single",
       "bundler": "metro",
       "backgroundColor": "#F7EFE6"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3063037f-1d86-49a8-93ee-9eb654d00edb"
+      }
     }
   }
 }
