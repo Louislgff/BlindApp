@@ -28,6 +28,12 @@
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "owner": "louisblind",
+    "web": {
+      "output": "single",
+      "bundler": "metro",
+      "backgroundColor": "#F7EFE6"
     }
   }
 }

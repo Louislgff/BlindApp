@@ -1,0 +1,40 @@
+# Publie la version web de l'app sur EAS Hosting (lien fixe en .expo.app) à chaque modification.
+name: Version web
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', 'src/**', 'assets/**', 'app.json', 'package.json', '.github/workflows/web.yml']
+  workflow_dispatch:
+
+concurrency: version-web
+
+permissions:
+  contents: write
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN || secrets.EXPOTOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Installer les dépendances
+        run: npm install --no-audit --no-fund
+      - name: Lier le projet à Expo (une seule fois)
+        run: |
+          if node -e "process.exit(require('./app.json').expo.extra?.eas?.projectId ? 0 : 1)"; then echo "Déjà lié"; exit 0; fi
+          npx -y eas-cli@latest init --non-interactive --force
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.json && git commit -m "Lien avec le projet Expo (projectId)" && git pull --rebase -q && git push
+      - name: Build web
+        run: npx expo export --platform web
+      - name: Publier sur EAS Hosting
+        run: |
+          npx -y eas-cli@latest deploy --prod --non-interactive --json > deploy.json 2> deploy.err || { echo "::error title=EAS Hosting::$(tail -c 600 deploy.err | tr '\n' ' ')"; exit 1; }
+          url=$(node -e "const d=require('./deploy.json'); console.log(d.production?.url || d.url || d.deploymentUrl || JSON.stringify(d).slice(0,300))")
+          echo "::notice title=Version web::$url"
