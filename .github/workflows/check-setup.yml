@@ -18,7 +18,7 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN || secrets.EXPOTOKEN }}
         run: |
           if [ -z "$EXPO_TOKEN" ]; then echo "::error title=Expo::Secret EXPO_TOKEN absent"; exit 0; fi
-          u=$(npx -y eas-cli@latest whoami 2>&1 | head -1)
+          u=$(npx -y eas-cli@latest whoami 2>/dev/null | grep -v "^\s*$" | head -1)
           echo "::notice title=Expo::Connecté en tant que : $u"
       - name: Base Supabase
         env:
