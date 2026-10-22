@@ -1,0 +1,35 @@
+# Publie l'app native en mise à jour EAS, à ouvrir dans Expo Go sur téléphone.
+name: Expo Go
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**', 'src/**', 'assets/**', 'app.json', 'package.json', '.github/workflows/expo-go.yml']
+  workflow_dispatch:
+
+concurrency: expo-go
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN || secrets.EXPOTOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Installer les dépendances
+        run: npm install --no-audit --no-fund
+      - name: Publier la mise à jour
+        run: |
+          msg="$(git log -1 --pretty=%s | cut -c1-80)"
+          npx -y eas-cli@latest update --channel main --message "$msg" --platform all --environment production --non-interactive --json > update.json 2> update.err \
+            || { echo "::error title=EAS Update::$(tail -c 800 update.err | tr '\n' ' ')"; exit 1; }
+          node -e '
+            const u = require("./update.json"); const list = Array.isArray(u) ? u : [u];
+            const g = list[0].group, pid = require("./app.json").expo.extra.eas.projectId;
+            console.log(`::notice title=Expo Go (page)::https://expo.dev/accounts/louisblind/projects/blind/updates/${g}`);
+            console.log(`::notice title=Expo Go (lien direct)::exp://u.expo.dev/${pid}/group/${g}`);
+            console.log(`::notice title=Runtime::${list.map((x) => x.platform + " " + x.runtimeVersion).join(", ")}`);
+          '
