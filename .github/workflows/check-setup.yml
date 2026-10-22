@@ -1,0 +1,33 @@
+# Vérifie que les secrets sont en place, sans jamais afficher leur valeur.
+name: Vérifier la configuration
+
+on:
+  push:
+    paths: ['.github/workflows/check-setup.yml']
+  workflow_dispatch:
+
+jobs:
+  config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Compte Expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then echo "::error title=Expo::Secret EXPO_TOKEN absent"; exit 0; fi
+          u=$(npx -y eas-cli@latest whoami 2>&1 | head -1)
+          echo "::notice title=Expo::Connecté en tant que : $u"
+      - name: Base Supabase
+        env:
+          DB: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$DB" ]; then echo "::error title=Supabase::Secret SUPABASE_DB_URL absent"; exit 0; fi
+          sudo apt-get install -y -qq postgresql-client >/dev/null
+          if v=$(psql "$DB" -tAc "select current_setting('server_version')" 2>err.txt); then
+            echo "::notice title=Supabase::Connexion OK (Postgres $v)"
+          else
+            echo "::error title=Supabase::Connexion impossible : $(head -c 200 err.txt | tr '\n' ' ' | sed 's/postgresql:[^ ]*//g')"
+          fi
