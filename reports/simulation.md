@@ -1,6 +1,6 @@
 # Simulation des reveals
 
-_Généré automatiquement le 22/10/2026 à 10:45 sur la base Supabase, commit `39cc3ee7d1e3c118482c1b4f7998b95e8d9bafae`._
+_Généré automatiquement le 22/10/2026 à 10:48 sur la base Supabase, commit `31ef15caf232bb528debbf881dd9a9a9ed902324`._
 
 Profils fictifs : Lucien et les 15 profils du prototype, plus une population de Parisiens générée au hasard (reproductible).
 Les pourcentages sont calculés par le vrai algorithme de l’app.
@@ -70,11 +70,11 @@ Les pourcentages sont calculés par le vrai algorithme de l’app.
 - Céline (femme, 31 ans, Paris 9e) : ses 2 profils compatibles lui ont déjà été proposés
 - Karim (homme, 45 ans, Paris 12e) : ses 4 profils compatibles lui ont déjà été proposés
 - Charlie (non-binaire, 32 ans, Paris 7e) : aucun profil compatible avec ses critères
-- Louis (homme, 41 ans, Montreuil) : ses 1 profil compatible lui ont déjà été proposés
-- Mathieu (homme, 35 ans, Vincennes) : ses 1 profil compatible lui ont déjà été proposés
+- Louis (homme, 41 ans, Montreuil) : son seul profil compatible lui a déjà été proposé
+- Mathieu (homme, 35 ans, Vincennes) : son seul profil compatible lui a déjà été proposé
 - Romain (homme, 29 ans, Paris 15e) : ses 4 profils compatibles lui ont déjà été proposés
-- Hélène (femme, 44 ans, Paris 12e) : ses 1 profil compatible lui ont déjà été proposés
-- Charlie (non-binaire, 44 ans, Boulogne-Billancourt) : ses 1 profil compatible lui ont déjà été proposés
+- Hélène (femme, 44 ans, Paris 12e) : son seul profil compatible lui a déjà été proposé
+- Charlie (non-binaire, 44 ans, Boulogne-Billancourt) : son seul profil compatible lui a déjà été proposé
 - Camille (non-binaire, 34 ans, Paris 17e) : ses 3 profils compatibles lui ont déjà été proposés
 - … et 18 autres
 
