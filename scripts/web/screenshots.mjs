@@ -28,6 +28,19 @@ if (await tap('Aperçu du jour du reveal')) await shot('2-reveal', 'Reveal de 20
 await page.goto(url, { waitUntil: 'networkidle' });
 if (await tap('Messages')) await shot('3-messages', 'Messages');
 if (await tap('Profil')) await shot('4-profil', 'Profil');
+// Inscription : écran du numéro, puis tentative d'envoi d'un code (montre le message si les SMS ne sont pas encore activés).
+await page.goto(url, { waitUntil: 'networkidle' });
+if (await tap('Créer mon compte')) {
+  await shot('5-numero', 'Inscription : numéro');
+  try {
+    await page.getByLabel('Numéro de téléphone').fill('06 12 34 56 78');
+    await tap('Recevoir le code');
+    await shot('6-envoi-code', 'Inscription : envoi du code');
+  } catch { steps.push('| ⚠️ Saisie du numéro impossible | |'); }
+}
+// Questionnaire (démo) : les bases et la barre de progression.
+await page.goto(url, { waitUntil: 'networkidle' });
+if (await tap('Profil') && await tap('Mes réponses')) { await shot('7-mes-reponses', 'Mes réponses'); }
 await browser.close();
 
 writeFileSync('reports/web.md', [
