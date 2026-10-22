@@ -2,9 +2,11 @@
 
 Lien : https://blind.expo.app
 
-_Contrôlée automatiquement le 22/10/2026 11:20:38._
+_Contrôlée automatiquement le 22/10/2026 11:46:50._
 
-✅ Aucune erreur dans la page.
+**Erreurs dans la page (1)** :
+
+- `Failed to load resource: the server responded with a status of 400 ()`
 
 | Écran | Capture |
 |---|---|
@@ -12,3 +14,6 @@ _Contrôlée automatiquement le 22/10/2026 11:20:38._
 | Reveal de 20 h | ![](web/2-reveal.png) |
 | Messages | ![](web/3-messages.png) |
 | Profil | ![](web/4-profil.png) |
+| Inscription : numéro | ![](web/5-numero.png) |
+| Inscription : envoi du code | ![](web/6-envoi-code.png) |
+| Mes réponses | ![](web/7-mes-reponses.png) |
