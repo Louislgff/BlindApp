@@ -2,7 +2,7 @@
 
 Lien : https://blind.expo.app
 
-_Contrôlée automatiquement le 22/10/2026 10:54:48._
+_Contrôlée automatiquement le 22/10/2026 11:07:51._
 
 ✅ Aucune erreur dans la page.
 
