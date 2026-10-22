@@ -1,0 +1,30 @@
+# Vérifications automatiques à chaque envoi de code : tests du matching, typage, build web.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Installer les dépendances
+        run: npm install --no-audit --no-fund
+      - name: Versions alignées sur le SDK Expo
+        run: npx expo install --check || echo "::warning::Certaines versions ne correspondent pas au SDK Expo"
+      - name: Tests du matching
+        run: npm test
+      - name: Typage TypeScript
+        run: npm run typecheck
+      - name: Build web
+        run: npx expo export --platform web
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: dist

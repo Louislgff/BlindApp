@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Blind",
+    "slug": "blind",
+    "scheme": "blind",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "backgroundColor": "#F7EFE6",
+    "ios": {
+      "bundleIdentifier": "app.blind.ios",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "app.blind.android",
+      "backgroundColor": "#F7EFE6"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F7EFE6"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
