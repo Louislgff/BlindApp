@@ -2,7 +2,7 @@
 
 Lien : https://blind.expo.app
 
-_Contrôlée automatiquement le 22/10/2026 11:46:50._
+_Contrôlée automatiquement le 24/10/2026 10:58:55._
 
 **Erreurs dans la page (1)** :
 
@@ -17,3 +17,5 @@ _Contrôlée automatiquement le 22/10/2026 11:46:50._
 | Inscription : numéro | ![](web/5-numero.png) |
 | Inscription : envoi du code | ![](web/6-envoi-code.png) |
 | Mes réponses | ![](web/7-mes-reponses.png) |
+| Fiche avant reveal | ![](web/8-fiche.png) |
+| Fiche avant reveal (suite) | ![](web/9-fiche-suite.png) |
