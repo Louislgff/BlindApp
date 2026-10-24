@@ -178,7 +178,8 @@ export function BeforeReveal(p: BeforeRevealProps) {
           <View style={styles.tiles}>
             {common.map((t) => {
               const x = split(t);
-              return <Tile key={t} icon={SUMMARY_ICONS[x.k] ?? 'star'} k={x.k} v={x.v} />;
+              // Point sans valeur (« Des valeurs proches ») : la catégorie en titre, le point en valeur.
+              return x.v ? <Tile key={t} icon={SUMMARY_ICONS[x.k] ?? 'star'} k={x.k} v={x.v} /> : <Tile key={t} icon="star" k="Valeurs" v={x.k} />;
             })}
           </View>
         </Section>
@@ -235,7 +236,7 @@ export function BeforeReveal(p: BeforeRevealProps) {
 
 const styles = StyleSheet.create({
   hero: { marginHorizontal: space.xl, marginTop: space.l, padding: 20, borderRadius: 22, backgroundColor: colors.card, overflow: 'hidden' },
-  glow: { position: 'absolute', right: -60, top: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(232,148,74,0.14)' },
+  glow: { position: 'absolute', right: -60, top: -60, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(232,148,74,0.07)' },
   ringLabel: { fontFamily: fonts.sans, fontSize: 9, letterSpacing: 0.8, color: colors.muted, marginTop: 2 },
   pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 14 },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 30, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: colors.paper },
