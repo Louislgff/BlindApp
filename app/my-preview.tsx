@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BeforeReveal, type BeforeRevealProps } from '../src/components/BeforeReveal';
 import { MyMagazine } from '../src/components/Magazine';
-import { heightLabel, MusicLine, tagLabel } from '../src/components/ProfileCard';
-import { Button, Initial, Label, Muted, Serif } from '../src/components/ui';
+import { heightLabel, tagLabel } from '../src/components/ProfileCard';
+import { Button, Muted } from '../src/components/ui';
 import { ME } from '../src/data/mock';
 import { QUESTIONS } from '../src/data/questions';
 import { useStore } from '../src/state/store';
@@ -25,14 +26,14 @@ export default function MyPreview() {
     router.back();
   };
 
-  const facts: string[] = [];
-  if (profile.job) facts.push(ME.job);
-  if (profile.zone) facts.push(ME.zone);
+  const facts: BeforeRevealProps['facts'] = [];
+  if (profile.job) facts.push({ icon: 'briefcase', text: ME.job });
+  if (profile.zone) facts.push({ icon: 'map-pin', text: ME.zone });
   const height = ME.answers.taille?.mine;
-  if (profile.height && typeof height === 'number') facts.push(heightLabel(height));
+  if (profile.height && typeof height === 'number') facts.push({ icon: 'arrow-up', text: heightLabel(height) });
   if (profile.studies) {
     const o = QUESTIONS.find((q) => q.id === 'etudes')?.options?.find((x) => x.value === ME.answers.etudes?.mine);
-    if (o) facts.push(o.label);
+    if (o) facts.push({ icon: 'book-open', text: o.label });
   }
   const prompts = profile.prompts.filter((p) => p.answer.trim()).sort((a, b) => Number(!!a.question) - Number(!!b.question));
 
@@ -72,37 +73,18 @@ export default function MyPreview() {
           </>
         ) : (
           <>
-            <View style={styles.hero}>
-              <Initial letter={ME.initial} size={116} highlight />
-              <Serif size={36}>
-                {ME.firstName}, {ME.age}
-              </Serif>
-              {facts.length > 0 && <Muted style={{ fontSize: 14 }}>{facts.join(' · ')}</Muted>}
-              {profile.music && (
-                <View>
-                  <MusicLine track={profile.music} />
-                </View>
-              )}
-            </View>
+            <BeforeReveal
+              initial={ME.initial}
+              name={ME.firstName}
+              age={ME.age}
+              facts={facts}
+              music={profile.music}
+              answers={ME.answers}
+              prompts={prompts}
+              highlights={profile.highlights.map(tagLabel)}
+              bioTitle="Votre profil"
+            />
             {note}
-            {(prompts.length > 0 || profile.highlights.length > 0) && (
-              <View style={styles.section}>
-                <Label>Son profil</Label>
-                <View style={styles.tags}>
-                  {profile.highlights.map((h) => (
-                    <View key={h} style={styles.tag}>
-                      <Text style={{ fontFamily: fonts.sans, fontSize: 13, color: colors.rose }}>{tagLabel(h)}</Text>
-                    </View>
-                  ))}
-                </View>
-                {prompts.map((p) => (
-                  <View key={p.question || 'libre'} style={{ gap: 4 }}>
-                    {!!p.question && <Muted style={{ fontSize: 12 }}>{p.question}</Muted>}
-                    <Serif size={21} style={{ lineHeight: 27 }}>{p.answer}</Serif>
-                  </View>
-                ))}
-              </View>
-            )}
           </>
         )}
       </ScrollView>

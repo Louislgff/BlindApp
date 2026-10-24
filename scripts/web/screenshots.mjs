@@ -41,6 +41,13 @@ if (await tap('Créer mon compte')) {
 // Questionnaire (démo) : les bases et la barre de progression.
 await page.goto(url, { waitUntil: 'networkidle' });
 if (await tap('Profil') && await tap('Mes réponses')) { await shot('7-mes-reponses', 'Mes réponses'); }
+// Fiche avant reveal (résumé de match), en haut puis plus bas.
+await page.goto(url, { waitUntil: 'networkidle' });
+if (await tap('Messages') && await tap('Claire')) {
+  await shot('8-fiche', 'Fiche avant reveal');
+  await page.mouse.wheel(0, 900);
+  await shot('9-fiche-suite', 'Fiche avant reveal (suite)');
+}
 await browser.close();
 
 writeFileSync('reports/web.md', [
